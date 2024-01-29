@@ -1,41 +1,86 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import Dict
-
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.core.database import engine
+from app.api.v1 import user as useRoute
+from app.api.v1 import category as categoryRoute
+from app.api.v1 import product as productRoute
+from app.api.v1 import auth as authRoute
+from app.api.v1 import docsAuth as docsAuthRoute
+from app.api.v1 import cart as cartRoute
+from app.api.v1 import order as orderRoute
+from app.models import user
+from app.models import category
+from app.models import product
 app = FastAPI()
 
-class Product(BaseModel):
-    name: str
-    quantity: int
+# CORS middleware to allow all origins during development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+from app.core.database import SessionLocal, engine
 
-shopping_cart: Dict[int, Product] = {}
+user.Base.metadata.create_all(bind=engine)
+category.Base.metadata.create_all(bind=engine)
+product.Base.metadata.create_all(bind=engine)
 
-@app.post('/add-to-cart/{product_id}')
-def add_to_cart(product_id: int, product: Product):
-    if product_id in shopping_cart:
-        shopping_cart[product_id].quantity += product.quantity
-    else:
-        shopping_cart[product_id] = product
-    return shopping_cart[product_id]
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-@app.get('/view-cart/{user_id}')
-def view_cart(user_id: int):
-    if user_id not in shopping_cart:
-        raise HTTPException(status_code=404, detail="User not found")
-    return shopping_cart[user_id]
+# Include API routes
+app.include_router(authRoute.router, prefix="/api/v1", tags=["api-Auth"])
+app.include_router(docsAuthRoute.router, prefix="", tags=["auth"])
+app.include_router(useRoute.router, prefix="/api/v1", tags=["user"])
+app.include_router(categoryRoute.router, prefix="/api/v1", tags=["category"])
+app.include_router(productRoute.router, prefix="/api/v1", tags=["product"])
+app.include_router(cartRoute.router, prefix="/api/v1", tags=["cart"])
+app.include_router(orderRoute.router, prefix="/api/v1", tags=["order"])
 
-@app.put('/update-cart/{product_id}')
-def update_cart(product_id: int, product: Product):
-    if product_id in shopping_cart:
-        shopping_cart[product_id] = product
-        return shopping_cart[product_id]
-    else:
-        raise HTTPException(status_code=404, detail="Product not found in the cart.")
+if __name__ == "__main__":
+    import uvicorn
 
-@app.delete('/remove-from-cart/{product_id}')
-def remove_from_cart(product_id: int):
-    if product_id in shopping_cart:
-        removed_product = shopping_cart.pop(product_id)
-        return {'message': 'Product removed from the cart', 'removed_product': removed_product}
-    else:
-        raise HTTPException(status_code=404, detail="Product not found in the cart.")
+    # Run the application using Uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8000)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# from typing import Union
+
+# from fastapi import FastAPI
+
+# app = FastAPI()
+
+
+
+# @app.get("/")
+# def read_root():
+#     return {"Hello": "World"}
+
+
+# @app.get("/items/{item_id}")
+# def read_item(item_id: int, q: Union[str, None] = None):
+#     return {"item_id": item_id, "q": q}

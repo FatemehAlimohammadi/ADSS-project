@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "student",
+            "group": "a",
+            "database": "${workspaceFolder:fastapi-learning-by-practice}/test.db"
+        }
+    ]
+}
