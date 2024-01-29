@@ -4,7 +4,7 @@ import Logo from "../assets/logo.png";
 import Contacts from "../assets/Contacts.png";
 import Buying from "../assets/Buying.png";
 import { Link } from "react-router-dom";
-
+import axios from 'axios'
 const StyledDiv = styled.div`
   position: fixed;
   inset: 0;
@@ -209,8 +209,71 @@ const StyledDiv = styled.div`
         }
   }
 `;
+import { useNavigate } from 'react-router-dom';
 
 const ProfileModal = ({ setIsShowModal }) => {
+  const navigate = useNavigate();
+
+  const [gender,setGender] = React.useState('')
+  const [name,setName] = React.useState('')
+  const [password,setPassword] = React.useState('')
+  const [lastName,setLastName] = React.useState('')
+  const [email,setEmail] = React.useState('')
+  const [address,setAddress] = React.useState('')
+  const [errorMessage,setError] = React.useState('')
+
+  function registerUser() {
+    const apiUrl = "http://localhost:8000/api/v1/";
+    const url = apiUrl + "users";
+
+    const formData = new FormData();
+    formData.append('email', email);
+    formData.append('password', password);
+    formData.append('gender', gender);
+    formData.append('name', name);
+    formData.append('lastName', lastName);
+    formData.append('address', address);
+    const jsonData = {};
+    formData.forEach((value, key) => {
+      jsonData[key] = value;
+    });
+
+
+    return new Promise((resolve, reject) => {
+      // Making a POST request with Axios
+      axios.post(url,jsonData)
+        .then(response => {
+          // Handle the successful response here
+          if (response.status != 200) {
+            reject('login-error');
+          }
+          resolve(response.data)
+        })
+        .catch(error => {
+          // Handle errors here
+          reject('login-error')
+        });
+    });
+
+  }
+
+  async function registerHandle(e){
+    try {
+      e.preventDefault();
+      const response = await registerUser();
+  
+      if(response && Object.keys(response)){
+        localStorage.setItem('token', response.access_token)
+        navigate('/confirm-order')
+  
+      }else{
+        throw new Error('error')
+      }
+     } catch (error) {
+        setError('خطا در برنامه')
+     }
+  }
+
   return (
     <StyledDiv>
       <button className="close" onClick={() => setIsShowModal(false)}>
@@ -235,32 +298,37 @@ const ProfileModal = ({ setIsShowModal }) => {
             <div className="form-row">
               <span className="lbl">جنسیت:</span>
               <label htmlFor="female">
-                <input type="radio" name="selectgender" id="female" />
+                <input type="radio" checked={gender=='male'} onClick={(e)=>setGender('male')} name="selectgender" id="female" />
                 زن
               </label>
               <label htmlFor="male">
-                <input type="radio" name="selectgender" id="male" />
+                <input type="radio" checked={gender=='female'} onClick={(e)=>setGender('female')} name="selectgender" id="male" />
                 مرد
               </label>
             </div>
             <label htmlFor="fname" className="form-row">
               <span className="lbl">نام:</span>
-              <input type="text" id="fname" />
+              <input type="text" value={name} onChange={(e)=>setName(e.target.value)} id="fname" />
             </label>
             <label htmlFor="lname" className="form-row">
               <span className="lbl">نام خانوادگی:</span>
-              <input type="text" id="lname" />
+              <input type="text"  value={lastName} onChange={(e)=>setLastName(e.target.value)} id="lname" />
             </label>
             <label htmlFor="email" className="form-row">
               <span className="lbl">ایمیل:</span>
-              <input type="email" id="email" />
+              <input type="email" value={email} onChange={(e)=>setEmail(e.target.value)}  id="email" />
+            </label>
+            <label htmlFor="email" className="form-row">
+              <span className="lbl">رمز عبور:</span>
+              <input type="text" id="password" value={password} onChange={(e)=>setPassword(e.target.value)} />
             </label>
             <label htmlFor="address" className="form-row">
               <span className="lbl">آدرس:</span>
-              <input type="text" id="address" />
+              <input type="text"  value={address} onChange={(e)=>setAddress(e.target.value)}   id="address" />
             </label>
-            <button type="button">
-              <Link to="/confirm-order">ثبت</Link>
+            <button type="button" onClick={registerHandle}>
+            ثبت
+              {/* <Link to="/confirm-order">ثبت</Link> */}
             </button>
           </form>
         </div>

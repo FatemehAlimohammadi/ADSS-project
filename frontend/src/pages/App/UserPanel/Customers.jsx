@@ -1,5 +1,7 @@
 import React from "react";
 import styled from "styled-components";
+import setAuthToken from "../../../helpers/setToken";
+import { fetchApi } from "../../../utils/FetchApi";
 
 const StyledCustomers = styled.div`
   table {
@@ -48,7 +50,20 @@ const StyledCustomers = styled.div`
   }
 `;
 
+
 const Customers = ({ title }) => {
+
+  const [customers,setCustomers] = React.useState([]);
+
+  React.useEffect(() => {
+    setAuthToken()
+    fetchApi("users")
+      .then((res) => {
+        setCustomers(res.data);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
   return (
     <StyledCustomers className="part">
       <h2 className="part-title">{title}</h2>
@@ -61,26 +76,17 @@ const Customers = ({ title }) => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>A</td>
-            <td>3</td>
-            <td className="address"></td>
-          </tr>
-          <tr>
-            <td>B</td>
-            <td>5</td>
-            <td className="address"></td>
-          </tr>
-          <tr>
-            <td>C</td>
-            <td>2</td>
-            <td className="address"></td>
-          </tr>
-          <tr>
-            <td>D</td>
-            <td>1</td>
-            <td className="address"></td>
-          </tr>
+
+          {
+            customers.length && customers.map(customer=>(
+              <tr>
+                <td>{customer.name}</td>
+                <td>{Math.round(Math.random() * 10)}</td>
+                <td className="address">{customer.address}</td>
+              </tr>
+
+            ))
+          }
         </tbody>
       </table>
     </StyledCustomers>

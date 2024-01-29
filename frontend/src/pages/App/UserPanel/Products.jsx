@@ -1,12 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
-
+import { fetchApi } from "../../../utils/FetchApi";
+import setAuthToken from "../../../helpers/setToken";
+import axios from 'axios'
 const StyledProducts = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 22px;
 
+  input{
+    text-align:center;
+    color: orange;
+    font-size:20px;
+  }
   & > h2 {
     align-self: flex-start;
   }
@@ -130,7 +137,74 @@ const StyledProducts = styled.div`
   }
 `;
 
+
+
 const Products = ({ title }) => {
+  const [products, setProducts] = React.useState([]);
+
+  const [name, setName] = React.useState('')
+  const [description, setDescription] = React.useState('')
+  const [price, setPrice] = React.useState(0)
+  const [count, setCount] = React.useState(2)
+
+
+  
+  function saveProduct() {
+    const apiUrl = "http://localhost:8000/api/v1/";
+    const url = apiUrl + "products";
+
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('category_id', 3);
+    formData.append('image', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMwAAADACAMAAAB/Pny7AAAA2FBMVEX////x7+Lf3dA7g4JNo6Tq6uo+PkBNTlDBwcAyMjeamppJSkzKyb/39edhYWE2NjnTpUeampZqamtEUFE/RUmgn5o5PkKQkItbW1pycXNDREb2ulDttVFXpqbu8OA5hIA9dnXYuHb215z179rRoTwzeHWizMbn8eg9j47Mzcinp6PS0tIAAACHh4K2t7AeHSH358P126vizJ/xx3b2tkDOp1PlyZXv5MjvvF7TrmTs2bDwy4XG0MWtv7adt7Fol5J9pJ/Q49e+2M15s6+SvrtWjIlCbW1JZGXWYqPUAAAEI0lEQVR4nO3bbVObTBiG4dKNiSklxEfbqjFEDQSftkatWm0lEEhS//8/KkveILyEezqBpb1Op+Po9IPH3LsL+bBv3iCEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhP6R/v/8gdwBsQ/7hVD2WnLD/5IbhOS6Sqyuyl8KsDQDhnx6ROhUbVJS67yvu9e0uEWWWwe0VfaJ0HVLDTjqri17KrccDyWFlERreMw1N7sezX6dW95T/7q3xIbHPqb5uQjMAZFCx7z9xDHvCsAcD6mDoWOGjWIwcou8yuiY9/6uAQYYYIABBhhggAEGGGBExWiS1L+9u/t2+1R5DKfc3XceHnT98Xs/+Dn4V0mMb7k863Q6Z+22rl88VR1z1+nMMT7nImGpVQnz9LzGtPVv2sZcqoW57IQxP/hCq+4yuw9j2u34OqsQpv8cweg/K405+4swUnQy7WpjXiKYx0rvGek2cprxl4AKY/ovD+uHJh9M7ueMNbLt0UgkjCY93S8x+mN8x6RjbIcZhjEbW+JguOby+aFzpuvti1tl/pscGMnuGYxnzATCBPvm8uX+x/ef8f2SipEstsywxcL4O6ffT/vUloixZmytEQ2zWnP5MJbDQo0loTDaxvctGMsxwhjDEwmTZMjCjCMWxhyRMJnFLTZjvahmJCYmPqSYZcRiOeJhNE1LAMUsszgmMhoxMLmWmZVkYY4lGkaTFNP1XDMT4xhJGGYLh1G8SbfbnbiR/xOhSCmW8GjEwChet8brRjQRyziZEnmpEQKjDGqLJmYKxu6lYRizRMKYk1otSRM+yFjsCZMwmtIxmuR2a6GmWgIm+SBbaSxhMF4t2iCO4W+XGcvMGAuCMQcbllrXkxZPzxUmdfMvNZ4IGMWdblr4kbYxmW0WxmYiYLxJ3LI+BJYH2VbL8gwoE2N63SSLr1GCdbY+yLZXNia+XdZHmrKajLUdws8Gu1yMkrjE5l0NlAXGTXmJieWWhvEXkXuVbvHzFI1jzFnWmRyezri8ySibT5ckTa6DbNWoJIyWsV2W+Qd00sfk9MYlYZKeLrEmrjQKLDk5vVEpGDdj64eaDjLfyGI5xWK0YOunPV1iXZEs/q4pfDLmNK+FjHGGrWInY+ZbYmRMsLHGRU6mr7i5x+KfZ1e5T7JF50cFXmzY/nSJYoiWXpEYc0qx0PcMOz8sDEPZLqJjbKpFXEzjcEa1iIxhfxGmcU61kE8z9qug06whv2Z/gPnTyfjPJOOwqNuADfnXTjF8MB+LwHxpBjebX2ddUrSX5vNXbqnf7PzmeX1+jVw+JHX0kVJ93s3erjH7TdLl+cUV+tM6OXXnq8zvXeOUnkq7Qx9coz/ZvcWfzfUJuf+onVwPi7D47RVQQRSEEEIIIYQQQgghhBBCCCGEEEIIIYQQQggh9C/1G8tw8kjtcM/VAAAAAElFTkSuQmCC');
+    formData.append('price', price);
+    formData.append('description', description);
+    formData.append('is_active', true);
+
+
+    const jsonData = {};
+    formData.forEach((value, key) => {
+      jsonData[key] = value;
+    });
+
+    return new Promise((resolve, reject) => {
+      // Making a POST request with Axios
+      setAuthToken()
+      axios.post(url, jsonData)
+        .then(response => {
+          // Handle the successful response here
+          if (response.status != 200) {
+            reject('login-error');
+          }
+          resolve(response.data)
+        })
+        .catch(error => {
+          // Handle errors here
+          reject('login-error')
+        });
+    });
+  }
+
+
+  useEffect(() => {
+    setAuthToken()
+    fetchApi("products?skip=0&limit=100")
+      .then((res) => {
+        setProducts(res.data);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
+
+  async function handleSaveProduct(e) {
+    e.preventDefault();
+    try {
+      await saveProduct()
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <StyledProducts className="part">
       <h2 className="part-title">{title}</h2>
@@ -138,21 +212,21 @@ const Products = ({ title }) => {
         <h5 className="title">+ اضافه کردن محصول جدید / ویرایش</h5>
         <div className="form-row">
           <span>نام محصول:</span>
-          <input type="text" />
+          <input value={name} onChange={(e) => setName(e.target.value)} type="text" />
         </div>
         <div className="form-row">
           <span>مشخصات:</span>
-          <input type="text" />
+          <input value={description} onChange={(e) => setDescription(e.target.value)} type="text" />
         </div>
         <div className="form-row">
           <span>قیمت:</span>
-          <input type="number" />
+          <input value={price} onChange={(e) => setPrice(e.target.price)} type="number" />
         </div>
         <div className="form-row">
           <span>موجودی:</span>
-          <input type="number" />
+          <input value={count} onChange={(e) => setCount(e.target.value)} type="number" />
         </div>
-        <button className="sub">ثبت</button>
+        <button onClick={handleSaveProduct} className="sub">ثبت</button>
       </form>
       <table>
         <thead>
@@ -164,12 +238,18 @@ const Products = ({ title }) => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>گلدان Aa</td>
-            <td>200000</td>
-            <td>2</td>
-            <td>ویرایش</td>
-          </tr>
+
+          {
+            products.length > 0 && products.map(product => (
+              <tr>
+                <td>{product.name}</td>
+                <td>{product.price}</td>
+                <td>2</td>
+                <td>ویرایش</td>
+              </tr>
+
+            ))
+          }
           <tr>
             <td>دسته گل ویژه</td>
             <td>200000</td>

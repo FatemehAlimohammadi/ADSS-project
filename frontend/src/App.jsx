@@ -14,10 +14,10 @@ function App() {
       <CartItemsContextProvider>
         <Header />
         <Routes>
-          <Route path="" element={<Home />} />
+          <Route path="/" element={<Home />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/product-page/:id" element={<ProductPage />} />
-          <Route path="/category-page/:name" element={<CategoryPage />} />
+          <Route path="/category-page/:id" element={<CategoryPage />} />
         </Routes>
       </CartItemsContextProvider>
       <Footer />

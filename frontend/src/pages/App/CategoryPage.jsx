@@ -58,49 +58,42 @@ const StyledDiv = styled.div`
 `;
 
 const CategoryPage = () => {
-  const { name } = useParams();
+  const { id } = useParams();
   const [productsByCategory, setProductsByCategory] = useState([]);
   const [page, setPage] = useState(0);
   const itemsPerPage = 6;
   const startIndex = page * itemsPerPage;
   const endIndex = (page + 1) * itemsPerPage;
 
-  let pageTitle;
-  switch (name) {
-    case "pots":
-      pageTitle = "گلدان ها";
-      break;
-    case "baskets":
-      pageTitle = "سبد گل";
-      break;
-    case "flowers":
-    default:
-      pageTitle = "دسته گل";
-  }
+  const [pageTitle,setPageTitle] = React.useState('')
+
 
   useEffect(() => {
-    fetchApi(`/${name}`)
+    fetchApi(`categories/${id}/products`)
       .then((res) => {
-        setProductsByCategory(res.data);
+        setPageTitle(res.data.name)
+        setProductsByCategory(res.data.products);
       })
       .catch((err) => console.log(err));
+   
   }, []);
 
   return (
     <StyledDiv>
       <h1>{pageTitle}</h1>
       <ul className="gallery">
-        {productsByCategory.slice(startIndex, endIndex).map((item) => {
-          return (
-            <li className="item" key={item.id}>
-              <Link to={`/product-page/${item.id}`}>
-                <img src={item.imgUrl} title={item.name} />
+        {productsByCategory && Object.keys(productsByCategory).length>0 && productsByCategory.map(porduct=>(
+            <li className="item" key={porduct.id}>
+              <p>{porduct.name}</p>
+              <Link to={`/product-page/${porduct.id}`}>
+                <img src={porduct.image} title={porduct.name} />
               </Link>
             </li>
-          );
-        })}
+          )
+          )
+      }
       </ul>
-      <ul className="pagination">
+      {/* <ul className="pagination">
         {
           //create array from 1..n, based on itemsPerPage
           Array.from(
@@ -126,7 +119,7 @@ const CategoryPage = () => {
         >
           - صفحه بعدی
         </li>
-      </ul>
+      </ul> */}
     </StyledDiv>
   );
 };

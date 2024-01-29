@@ -2,7 +2,10 @@ import React, { useContext, useState } from "react";
 import { cartItemsContext } from "../../contexts/cartItemsContext";
 import styled from "styled-components";
 import ProfileModal from "../../components/ProfileModal";
-
+import { validation } from "../../helpers/Validate";
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios'
+import setAuthToken from "../../helpers/setToken";
 const StyledDiv = styled.div`
   padding: 0 30px;
 
@@ -115,6 +118,9 @@ const StyledDiv = styled.div`
     }
   }
 `;
+
+
+
 const TotalPart = styled.div`
   border-top: 1px solid #680079;
   padding: 17px 8vw 50px;
@@ -170,12 +176,70 @@ const TotalPart = styled.div`
 `;
 
 const Cart = () => {
+  
+  const navigate = useNavigate();
+  const verified = validation();
+
+
   const { cartItems, dispatch } = useContext(cartItemsContext);
   const totalPrice = cartItems.reduce(
     (acc, current) => +(current.price * current.count) + acc,
     0
   );
   const [isShowModal, setIsShowModal] = useState(false);
+
+  
+  function saveProductToCart(product_id,count) {
+    const apiUrl = "http://localhost:8000/api/v1/";
+    const url = apiUrl + "carts";
+
+    const formData = new FormData();
+    formData.append('product_id', product_id);
+    formData.append('count', count);
+
+    const jsonData = {};
+    formData.forEach((value, key) => {
+      jsonData[key] = value;
+    });
+
+    return new Promise((resolve, reject) => {
+      // Making a POST request with Axios
+      axios.post(url, jsonData)
+        .then(response => {
+          // Handle the successful response here
+          if (response.status != 200) {
+            reject('login-error');
+          }
+          resolve(response.data)
+        })
+        .catch(error => {
+          // Handle errors here
+          reject('login-error')
+        });
+    });
+  }
+
+
+  async function handleRegiserCart(e){
+    setAuthToken()
+    try {
+      e.preventDefault();
+      if(!verified){
+        setIsShowModal(true)
+      }else{
+        let cart
+        //regiser cart products for user
+        const result = await Promise.all(cartItems.map(cartItem=>{
+          return saveProductToCart(cartItem.id,cartItem.count)
+        }))
+        const cart_id = result[0][0].id
+        localStorage.setItem('cart_id',cart_id)
+        navigate('/confirm-order')
+      }
+    } catch (error) {
+      
+    }
+  }
 
   return (
     <StyledDiv>
@@ -187,7 +251,7 @@ const Cart = () => {
           <ul className="cart-items-list">
             {cartItems.map((cartItem) => (
               <li key={cartItem.id} className="item">
-                <img src={cartItem.imgUrl} alt={cartItem.desc} />
+                <img src={cartItem.image} alt={cartItem.desc} />
                 <span className="name">{cartItem.name}</span>
                 <div className="controls">
                   <button
@@ -235,7 +299,7 @@ const Cart = () => {
                 قیمت کل:
                 <span className="total-price">{totalPrice}</span>
               </p>
-              <button onClick={() => setIsShowModal(true)}>ثبت سفارش</button>
+              <button onClick={handleRegiserCart}>ثبت سفارش</button>
             </div>
           </TotalPart>
           {isShowModal && <ProfileModal setIsShowModal={setIsShowModal} />}

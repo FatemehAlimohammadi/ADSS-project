@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "styled-components";
-
 const StyledPanel = styled.div`
   .istatistic {
     font-size: 20px;
@@ -58,26 +57,36 @@ const StyledPanel = styled.div`
   }
 `;
 
+
+
 const Panel = ({ title }) => {
+
+  React.useEffect(()=>{
+    
+  },[])
   return (
-    <StyledPanel className="part">
-      <h2 className="part-title">{title}</h2>
-      <h2 className="istatistic">آمار متداول</h2>
-      <div className="items-list">
-        <div className="item">
-          <span className="value">0</span>
-          <p className="label">سفارشات</p>
+    <>
+    
+      <StyledPanel className="part">
+        <h2 className="part-title">{title}</h2>
+        <h2 className="istatistic">آمار متداول</h2>
+        <div className="items-list">
+          <div className="item">
+            <span className="value">0</span>
+            <p className="label">سفارشات</p>
+          </div>
+          <div className="item">
+            <span className="value">0</span>
+            <p className="label">مشتریان ثبت نام کرده</p>
+          </div>
+          <div className="item">
+            <span className="value">6</span>
+            <p className="label">موجودی محصولات</p>
+          </div>
         </div>
-        <div className="item">
-          <span className="value">0</span>
-          <p className="label">مشتریان ثبت نام کرده</p>
-        </div>
-        <div className="item">
-          <span className="value">6</span>
-          <p className="label">موجودی محصولات</p>
-        </div>
-      </div>
-    </StyledPanel>
+      </StyledPanel>
+    </>
+
   );
 };
 

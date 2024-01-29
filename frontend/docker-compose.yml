@@ -1,6 +1,0 @@
-version: '3.8'
-services:
-  app_f:
-    ports:
-      - 5000:5173
-    image: store/front  

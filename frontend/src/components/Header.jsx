@@ -1,9 +1,12 @@
-import React, { useContext } from "react";
+import React, { useContext,useEffect } from "react";
 import styled from "styled-components";
 import Logo from "../assets/logo.png";
 import Cart from "../assets/shopping-cart.png";
 import { Link } from "react-router-dom";
 import { cartItemsContext } from "../contexts/cartItemsContext";
+import { validation } from "../helpers/Validate";
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios'
 
 const StyledHeader = styled.div`
 
@@ -114,6 +117,17 @@ const StyledHeader = styled.div`
 
 const Header = () => {
   const {cartItems} = useContext(cartItemsContext);
+  const verified = validation();
+  const navigate = useNavigate();
+ 
+
+  function logoutHandle(e){
+    e.preventDefault();
+    sessionStorage.clear();
+    navigate('/account')
+
+  }
+
 
   return (
     <StyledHeader>
@@ -129,7 +143,18 @@ const Header = () => {
             <span className="count">{cartItems.length}</span>
           </Link>
           </button>
-          <Link to="/account">ورود/ثبت نام</Link>
+
+          {
+            verified && (
+              <button onClick={logoutHandle}>خروج</button>
+            )
+          }
+          {
+            !verified && (
+              <Link to="/account">ورود/ثبت نام</Link>
+            )
+          }
+
         </div>
         <Link to="/">
           <img src={Logo} alt="فروشگاه لیلیا" className="logo-icon" />

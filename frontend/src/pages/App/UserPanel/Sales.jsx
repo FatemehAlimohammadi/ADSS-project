@@ -1,5 +1,7 @@
 import React from "react";
 import styled from "styled-components";
+import setAuthToken from "../../../helpers/setToken";
+import { fetchApi } from "../../../utils/FetchApi";
 
 const StyledSales = styled.div`
   table {
@@ -43,6 +45,19 @@ const StyledSales = styled.div`
 `;
 
 const Sales = ({ title }) => {
+
+  
+  const [orders,setOrders] = React.useState([]);
+
+  React.useEffect(() => {
+    setAuthToken()
+    fetchApi("orders")
+      .then((res) => {
+        setOrders(res.data);
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
   return (
     <StyledSales className="part">
       <h2 className="part-title">{title}</h2>
@@ -55,26 +70,16 @@ const Sales = ({ title }) => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>A</td>
-            <td>+</td>
-          </tr>
-          <tr>
-            <td>2</td>
-            <td>B</td>
-            <td>+</td>
-          </tr>
-          <tr>
-            <td>3</td>
-            <td>C</td>
-            <td>+</td>
-          </tr>
-          <tr>
-            <td>4</td>
-            <td>D</td>
-            <td>+</td>
-          </tr>
+          {console.log(orders)}
+          {
+            orders.length>0 && orders.map(order=>(
+              <tr>
+                <td>{order.id}</td>
+                <td>{order.owner.name}</td>
+                <td>+</td>
+              </tr>
+            ))
+          }
         </tbody>
       </table>
     </StyledSales>

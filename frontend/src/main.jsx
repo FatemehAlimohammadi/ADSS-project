@@ -7,7 +7,7 @@ import ConfirmOrder from "./pages/ConfirmOrder";
 import UserPanel from "./pages/App/UserPanel/UserPanel";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <BrowserRouter>
       <Routes>
         <Route path="*" element={<App />} />
@@ -16,5 +16,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/user-panel//*" element={<UserPanel />} />
       </Routes>
     </BrowserRouter>
-  </React.StrictMode>
+  // </React.StrictMode>
 );

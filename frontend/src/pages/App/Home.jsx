@@ -3,6 +3,12 @@ import { fetchApi } from "../../utils/FetchApi";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import TutorialFlower from "../../assets/tutorial-flower.png";
+import axios from 'axios'
+import setAuthToken from "./../../helpers/setToken";
+import Validation from '../../helpers/Validate';
+
+import { useNavigate } from 'react-router-dom';
+
 
 const StyledHome = styled.div`
 
@@ -175,6 +181,34 @@ const StyledHome = styled.div`
 const Home = () => {
   const [flowers, setFlowers] = useState([]);
 
+  const [categories ,setCategories] = React.useState([])
+  const [errorMessage,setError] = React.useState('');
+
+  function getCategoryList() {
+    setAuthToken();
+
+    let limit  = 100;
+    let skip = 0;
+
+    // const page= Math.floor(skip/limit);
+
+    // Example API request
+    axios.get(`http://localhost:8000/api/v1/categories?skip=${skip}&limit=${limit}`)
+      .then(response => {
+        // Handle the response
+        console.log(response.data)
+        setCategories(response.data);
+      })
+      .catch(error => {
+        // Handle errors
+        setError('خطا در  گرفتن اطلاعات کاربران')
+      });
+  }
+
+  useEffect(()=>{
+    getCategoryList();
+  },[])
+
   useEffect(() => {
     const api = () => {
       fetchApi("/flowers")
@@ -199,16 +233,21 @@ const Home = () => {
       <div className="bottom-section">
         <section className="category">
           <h2>دسته بندی محصولات</h2>
+          
           <ul>
-            <li>
-              <Link to="/category-page/flowers">دسته گل</Link>
-            </li>
-            <li>
+            {
+              categories.length>0 && categories.map(category=>{
+                return (
+                  <li key={category.name}>
+                    <Link to={`/category-page/${category.id}`}>{category.name} </Link>
+                  </li>
+                )
+              })
+            }
+            {/* <li>
               <Link to="/category-page/pots">گلدان</Link>
-            </li>
-            <li>
-              <Link to="/category-page/baskets">سبد گل</Link>
-            </li>
+            </li> */}
+            
           </ul>
         </section>
         <section className="tutorial">

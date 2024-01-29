@@ -86,7 +86,7 @@ const ProductPage = () => {
 
   const addProductToCart = () => {
     // check if product exist in cart, then update instead of adding to cart
-    const isItemExist = cartItems.find((item) => item.id === id);
+    const isItemExist = cartItems.find((item) => item.id == id);
     if (isItemExist) {
       dispatch({
         type: "INCREASE_IN_CART",
@@ -104,10 +104,9 @@ const ProductPage = () => {
   };
 
   useEffect(() => {
-    fetchApi("/all")
+    fetchApi("products/"+id)
       .then((res) => {
-        const result = res.data.find((item) => item.id === id);
-        setProduct(result);
+        setProduct(res.data);
       })
       .catch((err) => console.log(err));
   }, []);
@@ -116,10 +115,10 @@ const ProductPage = () => {
     <div>چیزی برای نمایش وجود ندارد.</div>
   ) : (
     <StyledDiv>
-      <img src={product.imgUrl} alt={product.name} className="product-image" />
+      <img src={product.image} alt={product.name} className="product-image" />
       <div className="product-name">
         <h1>{product.name}</h1>
-        <h2>{product.desc}</h2>
+        <h2>{product.description}</h2>
       </div>
       <div className="price-part">
         <strong className="product-price">{product.price} تومان</strong>
